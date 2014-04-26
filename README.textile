@@ -7,7 +7,7 @@ SockJS is WebSocket emulation library. It means that you use the WebSocket API, 
 
 h2. Prerequisites
 
-Even though this library uses Rack interface, *Thin is required* as "it supports asynchronous callback":http://macournoyer.com/blog/2009/06/04/pusher-and-async-with-thin.
+Even though this library uses Rack interface, *An evented webserver is required* like "Thin":http://macournoyer.com/blog/2009/06/04/pusher-and-async-with-thin/, Rainbows or Goliath. 
 For Websockets, we use "faye-websocket":http://blog.jcoglan.com/2011/11/28/announcing-faye-websocket-a-standards-compliant-websocket-library gem.
 
 h2. The Client-Side Part
