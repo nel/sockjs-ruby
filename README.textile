@@ -55,6 +55,7 @@ end
 # Make it a full rack app
 app = Rack::SockJS.new(EchoSession)
 
+# Run it with evented server
 EM.run do
   thin = Rack::Handler.get("thin")
   thin.run(app, Port: 8081)
