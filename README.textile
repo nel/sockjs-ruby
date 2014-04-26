@@ -15,7 +15,7 @@ h2. The Client-Side Part
 For the client-side part you have to use JS library "sockjs-client":http://sockjs.github.com/sockjs-client which provides WebSocket-like API. Here's an example:
 
 <pre>
-<script src="http://cdn.sockjs.org/sockjs-0.3.4.min.js"></script>
+<script src="http://cdn.sockjs.org/sockjs-0.3.min.js"></script>
 
 <script>
   var sock = new SockJS("http://mydomain.com/my_prefix");
@@ -40,24 +40,11 @@ Now in order to have someone to talk to, we need to run a server. That's exactly
 
 <pre>
 #!/usr/bin/env ruby
-# encoding: utf-8
 
 require "thin"
 require "rack/sockjs"
 
-# Your custom app.
-class MyHelloWorld
-  def call(env)
-    body = "This is the app, not SockJS."
-    headers = {
-      "Content-Type" => "text/plain; charset=UTF-8",
-      "Content-Length" => body.bytesize.to_s
-    }
-
-    [200, headers, [body]]
-  end
-end
-
+# A custom SockJS app
 class EchoSession < SockJS::Session
   def process_message(message)
     SockJS.debug "\033[0;31;40m[Echo]\033[0m message: #{message.inspect}, session: #{self.object_id}"
@@ -65,36 +52,16 @@ class EchoSession < SockJS::Session
   end
 end
 
-class CloseSession < SockJS::Session
-  def opened
-    SockJS.debug "\033[0;31;40m[Close]\033[0m closing the session ..."
-    close(3000, "Go away!")
-  end
-end
-
-app = Rack::Builder.new do
-  # Run one SockJS app on /echo.
-  map "/echo" do
-    run SockJS::Rack.new(EchoSession)
-  end
-
-  # ... and the other one on /close.
-  map "/close" do
-    run SockJS::Rack.new(CloseSession)
-  end
-
-  # This app will run on other URLs than /echo and /close,
-  # as these has already been assigned to SockJS.
-  run MyHelloWorld.new
-end
+# Make it a full rack app
+app = Rack::SockJS.new(EchoSession)
 
 EM.run do
   thin = Rack::Handler.get("thin")
-  thin.run(app.to_app, Port: 8081)
+  thin.run(app, Port: 8081)
 end
 </pre>
 
-For more complex example check "lib/sockjs/examples/sockjs_apps_for_sockjs_protocol_tests.rb"
+For more complex example as a middleware check "lib/sockjs/examples/sockjs_apps_for_sockjs_protocol_tests.rb"
 
 h2. SockJS Family
 
